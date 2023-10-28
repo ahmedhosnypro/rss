@@ -1,9 +1,9 @@
 package com.rss.controller;
 
 import com.rss.model.Feed;
+import com.rss.model.FeedUrl;
 import com.rss.service.FeedService;
 import com.rss.service.IngestionService;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @Validated
 @RestController
-@RequestMapping("/api/v1/feeds")
+@RequestMapping("/api/v1/feed")
 public class FeedConfigController {
     private final FeedService feedService;
     private final IngestionService ingestionService;
@@ -31,8 +31,8 @@ public class FeedConfigController {
     }
 
     @PostMapping
-    public ResponseEntity<Feed> addFeedConfiguration(@NotBlank  @RequestParam String url) {
-        var feed = ingestionService.ingestFeed(url);
+    public ResponseEntity<Feed> addFeedConfiguration(@RequestBody FeedUrl url) {
+        var feed = ingestionService.ingestFeed(url.getUrl());
         return ResponseEntity.ok().body(feed);
     }
 

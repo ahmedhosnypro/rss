@@ -1,25 +1,25 @@
 package com.rss.service;
 
 
-import com.rometools.rome.feed.synd.SyndEntry;
 import com.rss.model.Feed;
 import com.rss.repository.FeedRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 
 @Service
 public class FeedService {
-    private FeedRepository feedRepository;
+    private final FeedRepository feedRepository;
 
     public FeedService(FeedRepository feedRepository) {
         this.feedRepository = feedRepository;
     }
 
-    public Feed save(Feed feed) {
-        return feedRepository.save(feed);
+    public void save(Feed feed) {
+        feedRepository.save(feed);
     }
 
     public Feed findById(Long id) {
@@ -34,15 +34,7 @@ public class FeedService {
         return feedRepository.findAll();
     }
 
-    public Feed update(Feed feed) {
-        return feedRepository.save(feed);
-    }
-
-    public List<SyndEntry> getRssEntries(List<String> categories, Date startDate, Date endDate) {
-        return feedRepository.getEntries(categories, startDate, endDate);
-    }
-
-    public Feed enableFeed(Long id) {
+    public Feed enableFeed(@Positive Long id) {
         var feed = feedRepository.findById(id).orElse(null);
         if (feed == null) {
             throw new EntityNotFoundException("Feed with id " + id + " not found");
@@ -51,7 +43,7 @@ public class FeedService {
         return feedRepository.save(feed);
     }
 
-    public Feed disableFeed(Long id) {
+    public Feed disableFeed(@Positive Long id) {
         var feed = feedRepository.findById(id).orElse(null);
         if (feed == null) {
             throw new EntityNotFoundException("Feed with id " + id + " not found");

@@ -2,6 +2,7 @@ package com.rss.service;
 
 import com.rss.model.Feed;
 import com.rss.model.Item;
+import com.rss.model.SearchRequest;
 import com.rss.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 
@@ -37,7 +38,23 @@ public class ItemService {
         return itemRepository.findByCategory(category);
     }
 
-    public List<Item> search(List<String> categories, Date startDate, Date endDate) {
+    public List<Item> search(SearchRequest searchRequest) {
+        var categories = searchRequest.getCategories();
+        var startDate = searchRequest.getStartDate();
+        var endDate = searchRequest.getEndDate();
+
+        if (categories == null) {
+            categories = List.of();
+        }
+
+        if (startDate == null) {
+            startDate = new Date(0);
+        }
+
+        if (endDate == null) {
+            endDate = new Date();
+        }
+
         return itemRepository.search(categories, startDate, endDate);
     }
 }

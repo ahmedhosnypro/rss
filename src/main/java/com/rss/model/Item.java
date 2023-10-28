@@ -10,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import static jakarta.persistence.FetchType.LAZY;
+
 @Entity
 @Getter
 @Setter
@@ -27,6 +29,8 @@ public class Item {
 
     private String link;
 
+    @Lob
+    @Basic(fetch = LAZY)
     private String description;
 
     private String guid;
@@ -48,9 +52,6 @@ public class Item {
             inverseJoinColumns = @JoinColumn(name = "category_id"))
     private Set<Category> categories;
 
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinTable(name = "item_related_identifier",
-            joinColumns = @JoinColumn(name = "item_id"),
-            inverseJoinColumns = @JoinColumn(name = "related_identifier_id"))
+    @OneToMany(cascade = CascadeType.ALL)
     private List<RelatedIdentifier> relatedIdentifiers;
 }

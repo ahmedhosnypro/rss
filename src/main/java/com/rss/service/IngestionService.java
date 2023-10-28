@@ -5,9 +5,12 @@ import com.rometools.rome.feed.synd.SyndEntry;
 import com.rometools.rome.feed.synd.SyndFeed;
 import com.rometools.rome.io.SyndFeedInput;
 import com.rometools.rome.io.XmlReader;
+import com.rss.model.Category;
 import com.rss.model.Feed;
 import com.rss.model.Item;
 import com.rss.model.RelatedIdentifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +28,7 @@ public class IngestionService {
     private final CategoryService categoryService;
     private final RelatedIdentifierService relatedIdentifierService;
 
+    Logger logger = LoggerFactory.getLogger(IngestionService.class);
 
     public IngestionService(
             FeedService feedService,
@@ -45,7 +49,7 @@ public class IngestionService {
 
         // Ingest each feed
         for (Feed config : configs) {
-            if (config.isEnabled()) {
+            if (Boolean.TRUE.equals(config.isEnabled())) {
                 ingestFeed(config);
             }
         }
@@ -75,7 +79,6 @@ public class IngestionService {
         }
 
         for (SyndEntry entry : syndFeed.getEntries()) {
-
             processItems(feed, entry);
         }
     }
@@ -102,16 +105,16 @@ public class IngestionService {
         item.setThumbnails(thumbnails);
 
         // Handle categories
-        Set<String> categories = getCategories(entry);
+        Set<Category> categories = getCategories(entry);
         item.setCategories(categories);
 
         // Handle related identifiers
         Set<RelatedIdentifier> identifiers = new HashSet<>();
         entry.getForeignMarkup().forEach(foreignMarkup -> {
-                RelatedIdentifier identifier = new RelatedIdentifier();
-                identifier.setValue(foreignMarkup.getValue());
-                identifier.setType(foreignMarkup.getAttribute("type").getValue());
-                identifiers.add(identifier);
+            RelatedIdentifier identifier = new RelatedIdentifier();
+            identifier.setValue(foreignMarkup.getValue());
+            identifier.setType(foreignMarkup.getName());
+            identifiers.add(identifier);
         });
         var savedIdentifiers = relatedIdentifierService.saveAll(identifiers);
         item.setRelatedIdentifiers(savedIdentifiers);
@@ -119,9 +122,9 @@ public class IngestionService {
         itemService.save(item);
     }
 
-    private Set<String> getCategories(SyndEntry entry) {
+    private Set<Category> getCategories(SyndEntry entry) {
         List<SyndCategory> syndCategories = entry.getCategories();
-        Set<String> categories = new HashSet<>();
+        Set<Category> categories = new HashSet<>();
         for (SyndCategory category : syndCategories) {
             categories.add(categoryService.findOrCreate(category.getName()));
         }
@@ -136,7 +139,7 @@ public class IngestionService {
             InputStream stream = url.openConnection().getInputStream();
             return input.build(new XmlReader(stream));
         } catch (Exception ex) {
-//            logger.error("Error ingesting feed {}", link, ex);
+            logger.error("Error ingesting feed {}", link, ex);
         }
         return null;
     }

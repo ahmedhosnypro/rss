@@ -31,13 +31,14 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public String findOrCreate(String name) {
-        if (!categoryRepository.existsByName(name)) {
-            Category category = new Category();
+    public Category findOrCreate(String name) {
+        var category = categoryRepository.findByName(name).orElse(null);
+        if (category == null) {
+            category = new Category();
             category.setName(name);
             categoryRepository.save(category);
         }
-        return name;
+        return category;
     }
 
     public Category findByName(String name) {

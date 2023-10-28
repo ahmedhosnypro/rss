@@ -5,8 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.util.List;
 import java.util.Set;
+
+import static jakarta.persistence.FetchType.LAZY;
 
 
 @Entity
@@ -21,6 +25,8 @@ public class Feed {
 
     private String title;
 
+    @Lob
+    @Basic(fetch = LAZY)
     private String description;
 
     @Column(unique = true)
@@ -32,10 +38,7 @@ public class Feed {
     @CollectionTable(name = "feed_categories", joinColumns = @JoinColumn(name = "feed_id"))
     private Set<String> categories;
 
-    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL)
-    private Set<Item> items;
-
-    public Boolean isEnabled() {
+    public boolean isEnabled() {
         return enabled;
     }
 }
