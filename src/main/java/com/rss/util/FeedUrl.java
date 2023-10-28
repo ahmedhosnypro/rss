@@ -1,11 +1,9 @@
-package com.rss.model;
+package com.rss.util;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
 
+@Getter
 public class FeedUrl {
     private @NotBlank String url;
-
-    public String getUrl() {
-        return url;
-    }
 }

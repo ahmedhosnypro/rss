@@ -2,7 +2,7 @@ package com.rss.service;
 
 import com.rss.model.Feed;
 import com.rss.model.Item;
-import com.rss.model.SearchRequest;
+import com.rss.util.SearchRequest;
 import com.rss.repository.ItemRepository;
 import org.springframework.stereotype.Service;
 

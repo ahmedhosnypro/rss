@@ -51,5 +51,9 @@ public class FeedService {
         feed.setEnabled(false);
         return feedRepository.save(feed);
     }
+
+    public boolean existByLink(String link) {
+        return feedRepository.existsByLink(link);
+    }
 }
 

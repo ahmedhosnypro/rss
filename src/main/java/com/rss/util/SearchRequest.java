@@ -1,4 +1,4 @@
-package com.rss.model;
+package com.rss.util;
 
 import jakarta.validation.constraints.Past;
 import lombok.AllArgsConstructor;

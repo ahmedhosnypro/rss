@@ -9,6 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
+
+/**
+ * CategoryController
+ * <p>
+ *     <a href ="">/get /api/v1/categories - get available categories</a>
+ */
 @RestController
 @RequestMapping("/api/v1/categories")
 public class CategoryController {

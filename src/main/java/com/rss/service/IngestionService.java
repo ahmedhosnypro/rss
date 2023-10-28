@@ -9,6 +9,7 @@ import com.rss.model.Category;
 import com.rss.model.Feed;
 import com.rss.model.Item;
 import com.rss.model.RelatedIdentifier;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -42,6 +43,11 @@ public class IngestionService {
         this.relatedIdentifierService = relatedIdentifierService;
     }
 
+    /**
+     * Ingests all enabled feeds every hour
+     */
+
+    @PostConstruct
     @Scheduled(fixedRate = 3600)
     public void ingestFeeds() {
         // Get all enabled feeds
@@ -55,11 +61,24 @@ public class IngestionService {
         }
     }
 
+
+    /**
+     * Ingests a single feed
+     * @param link the link to the feed
+     * @return the feed
+     */
     public Feed ingestFeed(String link) {
+        // check if the feed already exists
+        boolean isExist = feedService.existByLink(link);
+        if (isExist) {
+            return null;
+        }
+        // try to read the feed
         SyndFeed syndFeed = readFeed(link);
         if (syndFeed == null) {
             return null;
         }
+
         Feed feed = new Feed();
         feed.setTitle(syndFeed.getTitle());
         feed.setDescription(syndFeed.getDescription());
@@ -67,7 +86,7 @@ public class IngestionService {
         feed.setEnabled(true);
         feedService.save(feed);
         for (SyndEntry entry : syndFeed.getEntries()) {
-            processItems(feed, entry);
+            processFeedItem(feed, entry);
         }
         return feed;
     }
@@ -79,11 +98,11 @@ public class IngestionService {
         }
 
         for (SyndEntry entry : syndFeed.getEntries()) {
-            processItems(feed, entry);
+            processFeedItem(feed, entry);
         }
     }
 
-    private void processItems(Feed feed, SyndEntry entry) {
+    private void processFeedItem(Feed feed, SyndEntry entry) {
         Item item = new Item();
 
         // Map entry fields to feed item
@@ -122,6 +141,12 @@ public class IngestionService {
         itemService.save(item);
     }
 
+    /**
+     * Gets the categories from the entry
+     * <br> if the category does not exist, it will be created and saved to the database
+     * @param entry feed entry
+     * @return the categories
+     */
     private Set<Category> getCategories(SyndEntry entry) {
         List<SyndCategory> syndCategories = entry.getCategories();
         Set<Category> categories = new HashSet<>();
@@ -131,6 +156,11 @@ public class IngestionService {
         return categories;
     }
 
+    /**
+     * Reads the feed from the link
+     * @param link the link to the feed
+     * @return the feed
+     */
     private SyndFeed readFeed(String link) {
         try {
             SyndFeedInput input = new SyndFeedInput();
